@@ -15,7 +15,7 @@ local function CreateGang()
     FatedGang.ui.CreateGang.panel_content = vgui.Create('DPanel', FatedGang.ui.CreateGang)
     FatedGang.ui.CreateGang.panel_content:Dock(FILL)
     FatedGang.ui.CreateGang.panel_content.Paint = nil
-    PrintTable(FatedGang.data)
+
     local gang_invite_table = FatedGang.data.invites[LocalPlayer():SteamID64()] or {}
 
     local function CreateContentInvite()
