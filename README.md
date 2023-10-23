@@ -1,2 +1,2 @@
 # FatedGang
- Create gangs to play together on Garry's Mod servers
+Create gangs to play together on Garry's Mod servers
