@@ -1,6 +1,9 @@
 // Цена создания банды
 FatedGang.config.cost_create = 5000000
 
+// Максимально количество участников
+FatedGang.config.max_members = 12
+
 // Включены ли арены или нет (арены - место сражений банд)
 FatedGang.config.arena_enabled = false
 

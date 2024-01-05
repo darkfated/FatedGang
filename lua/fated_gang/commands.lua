@@ -43,6 +43,12 @@ concommand.Add('fated_gang_command_invite', function(pl, _, args)
         return
     end
 
+    if table.Count(gang_data.players) + 1 > FatedGang.config.max_members then
+        FatedGang.notify(pl, 'Максимальное кол-во участников: ' .. FatedGang.config.max_members)
+
+        return
+    end
+
     local target_steamid = args[1]
 
     if !target_steamid then

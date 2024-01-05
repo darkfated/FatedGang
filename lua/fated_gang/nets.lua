@@ -93,7 +93,15 @@ if SERVER then
         end
 
         if invite_feedback_bool then
-            FatedGang.data[gang_id].players[pl:SteamID()] = {
+            local invite_gang_table = FatedGang.data[gang_id]
+
+            if table.Count(invite_gang_table.players) + 1 > FatedGang.config.max_members then
+                FatedGang.notify(pl, 'В банде уже максимальное кол-во участников.')
+        
+                return
+            end
+
+            invite_gang_table.players[pl:SteamID()] = {
                 nick = pl:Name(),
                 steamid64 = pl:SteamID64(),
                 rank = 'Участник'
