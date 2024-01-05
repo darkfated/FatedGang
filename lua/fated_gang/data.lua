@@ -31,9 +31,11 @@ hook.Add('PlayerInitialSpawn', 'FatedGang.ResetPlayerData', function(pl)
     FatedGang.initializationSendGangData()
     net.Send(pl)
 
-    net.Start('FatedGang-ToClientArena')
-        net.WriteTable(FatedGang.arenas)
-    net.Broadcast()
+    if FatedGang.config.arena_enabled then
+        net.Start('FatedGang-ToClientArena')
+            net.WriteTable(FatedGang.arenas)
+        net.Broadcast()
+    end
 end)
 
 hook.Add('PlayerDisconnected', 'FatedGang.SavePlayerData', function(pl)

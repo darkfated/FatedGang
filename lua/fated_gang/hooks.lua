@@ -1,75 +1,83 @@
 if SERVER then
-    timer.Create('FatedGang.ArenaReset', 1, 0, function()
-        local time = DaynightGlobal:GetTime()
+    if FatedGang.config.arena_enabled then
+        timer.Create('FatedGang.ArenaReset', 1, 0, function()
+            local time = DaynightGlobal:GetTime()
 
-        if string.format('%.2f', time) == '6.00' then
-            FatedGang.arenas = {}
-            FatedGang.CreateArenaList()
+            if string.format('%.2f', time) == '6.00' then
+                FatedGang.arenas = {}
+                FatedGang.CreateArenaList()
+
+                net.Start('FatedGang-ToClientArena')
+                    net.WriteTable(FatedGang.arenas)
+                net.Broadcast()
+            end
+        end)
+
+        hook.Add('PlayerSpawn', 'FatedGang.Arena', function(pl)
+            local arena_type = pl:GetGangArenaType()
+
+            if arena_type != '0' then
+                local active_arena = pl:GetGangActiveArena()
+
+                if active_arena != '0' then
+                    if pl:GetGangArenaPlayerDeath() then
+                        FatedGang.notify(pl, 'Вы умерли в этом раунде. Ожидайте следующего')
+
+                        timer.Simple(0, function()
+                            pl:SetPos(table.Random(FatedGang.config.arena_spawns_waiting))
+                        end)
+
+                        pl:StripWeapons()
+
+                        return
+                    end
+
+                    local arena_table = FatedGang.arenas[active_arena]
+                    local spawn_vector
+
+                    for k, spawn in pairs(arena_table.spawns[arena_type]) do
+                        if spawn[2] == pl:SteamID64() then
+                            spawn_vector = spawn[1]
+                        end
+                    end
+
+                    timer.Simple(0, function()
+                        pl:StripWeapons()
+                        pl:StripAmmo()
+                        pl:Give(arena_table.weapon)
+                        pl:GiveAmmo(1000, pl:GetActiveWeapon():GetPrimaryAmmoType(), true)
+                        pl:SetPos(spawn_vector)
+                        pl:SetModel(FatedGang.config.arena_models[arena_type])
+                        pl:SetPlayerColor(Vector(1, 1, 1))
+                    end)
+                end
+            end
+        end)
+
+        hook.Add('PlayerDeath', 'FatedGang.Arena', function(pl, _, attacker)
+            if pl:GetGangArenaType() == '0' then
+                return
+            end
+            
+            pl:SetGangArenaPlayerDeath(true)
+
+            local active_arena = pl:GetGangActiveArenaTable()
+            active_arena.alive[pl:GetGangArenaType()] = active_arena.alive[pl:GetGangArenaType()] - 1
 
             net.Start('FatedGang-ToClientArena')
                 net.WriteTable(FatedGang.arenas)
             net.Broadcast()
-        end
-    end)
 
-    hook.Add('PlayerSpawn', 'FatedGang.Arena', function(pl)
-        local arena_type = pl:GetGangArenaType()
+            local attacker_gang = attacker:GetGangTable()
+            attacker_gang.arena_kills = attacker_gang.arena_kills + 1
+        end)
 
-        if arena_type != '0' then
-            local active_arena = pl:GetGangActiveArena()
-
-            if active_arena != '0' then
-                if pl:GetGangArenaPlayerDeath() then
-                    FatedGang.notify(pl, 'Вы умерли в этом раунде. Ожидайте следующего')
-
-                    timer.Simple(0, function()
-                        pl:SetPos(table.Random(FatedGang.config.arena_spawns_waiting))
-                    end)
-
-                    pl:StripWeapons()
-
-                    return
-                end
-
-                local arena_table = FatedGang.arenas[active_arena]
-                local spawn_vector
-
-                for k, spawn in pairs(arena_table.spawns[arena_type]) do
-                    if spawn[2] == pl:SteamID64() then
-                        spawn_vector = spawn[1]
-                    end
-                end
-
-                timer.Simple(0, function()
-                    pl:StripWeapons()
-                    pl:StripAmmo()
-                    pl:Give(arena_table.weapon)
-                    pl:GiveAmmo(1000, pl:GetActiveWeapon():GetPrimaryAmmoType(), true)
-                    pl:SetPos(spawn_vector)
-                    pl:SetModel(FatedGang.config.arena_models[arena_type])
-                    pl:SetPlayerColor(Vector(1, 1, 1))
-                end)
+        hook.Add('PlayerSpawnProp', 'FatedGang.Arena', function(pl)
+            if pl:GetGangActiveArena() != '0' then
+                return false
             end
-        end
-    end)
-
-    hook.Add('PlayerDeath', 'FatedGang.Arena', function(pl, _, attacker)
-        if pl:GetGangArenaType() == '0' then
-            return
-        end
-        
-        pl:SetGangArenaPlayerDeath(true)
-
-        local active_arena = pl:GetGangActiveArenaTable()
-        active_arena.alive[pl:GetGangArenaType()] = active_arena.alive[pl:GetGangArenaType()] - 1
-
-        net.Start('FatedGang-ToClientArena')
-            net.WriteTable(FatedGang.arenas)
-        net.Broadcast()
-
-        local attacker_gang = attacker:GetGangTable()
-        attacker_gang.arena_kills = attacker_gang.arena_kills + 1
-    end)
+        end)
+    end
 
     hook.Add('PlayerDeath', 'FatedGang.Shop', function(pl)
         if pl:GetGangId() == '0' then
@@ -84,13 +92,7 @@ if SERVER then
             return false
         end
     end)
-
-    hook.Add('PlayerSpawnProp', 'FatedGang.Arena', function(pl)
-        if pl:GetGangActiveArena() != '0' then
-            return false
-        end
-    end)
-else
+elseif FatedGang.config.arena_enabled then
     local scrw = ScrW()
 
     hook.Add('HUDPaint', 'FatedGang.Arena', function()

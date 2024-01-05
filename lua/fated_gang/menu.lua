@@ -1316,6 +1316,18 @@ local function OpenGang()
             end
         },
         {
+            name = 'Список банд',
+            icon = Material('fated_gang/menu/pages/gang_list.png'),
+            func = function()
+                FatedGang.ui.OpenGang.panel_content:Clear()
+
+                CreatePageGangList()
+            end
+        },
+    }
+
+    local ConfigArenaPage = {
+        {
             name = 'Магазин',
             icon = Material('fated_gang/menu/pages/shop.png'),
             func = function()
@@ -1325,15 +1337,6 @@ local function OpenGang()
             end,
             dop_text = 'Новое',
             block = false
-        },
-        {
-            name = 'Список банд',
-            icon = Material('fated_gang/menu/pages/gang_list.png'),
-            func = function()
-                FatedGang.ui.OpenGang.panel_content:Clear()
-
-                CreatePageGangList()
-            end
         },
         {
             name = 'Арены',
@@ -1358,6 +1361,10 @@ local function OpenGang()
             block = false
         }
     }
+
+    if FatedGang.config.arena_enabled then
+        table.Add(ConfigPage, ConfigArenaPage)
+    end
 
     for i, page in pairs(ConfigPage) do
         local button_page = vgui.Create('DButton', FatedGang.ui.OpenGang.panel_left.sp)

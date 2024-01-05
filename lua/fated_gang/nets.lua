@@ -5,8 +5,11 @@ if SERVER then
     util.AddNetworkString('FatedGang-InviteFeedback')
     util.AddNetworkString('FatedGang-SetColor')
     util.AddNetworkString('FatedGang-CreateGang')
-    util.AddNetworkString('FatedGang-ToClientArena')
-    util.AddNetworkString('FatedGang-SelectArena')
+
+    if FatedGang.config.arena_enabled then
+        util.AddNetworkString('FatedGang-ToClientArena')
+        util.AddNetworkString('FatedGang-SelectArena')
+    end
 
     function FatedGang.notify(pl, txt)
         net.Start('FatedGang-Msg')
@@ -225,306 +228,308 @@ if SERVER then
         net.Broadcast()
     end)
 
-    net.Receive('FatedGang-SelectArena', function(_, pl)
-        if pl:GetGangId() == '0' then
-            FatedGang.notify(pl, 'У вас нет банды.')
+    if FatedGang.config.arena_enabled then
+        net.Receive('FatedGang-SelectArena', function(_, pl)
+            if pl:GetGangId() == '0' then
+                FatedGang.notify(pl, 'У вас нет банды.')
 
-            return 
-        end
-
-        if !pl:IsGangBoss() then
-            FatedGang.notify(pl, 'Вы не босс.')
-    
-            return
-        end
-
-        local arena_id = net.ReadString()
-        local arena_table = FatedGang.arenas[arena_id]
-
-        if !arena_table then
-            FatedGang.notify(pl, 'Такой арены не существует!')
-            
-            return
-        end
-
-        local server_time = GetGlobalFloat('SRP_Time') -- Можете вырезать проверку, либо привязать своё игровое время
-
-        if !(server_time > 0 and server_time < 6) then
-            FatedGang.notify(pl, 'Не подходящее время! С 0:00 до 6:00')
-
-            return
-        end
-
-        if arena_table.status == 3 then
-            FatedGang.notify(pl, 'Эта точка уже захватывается.')
-            
-            return
-        end
-
-        local pl_gang_id = pl:GetGangId()
-
-        if table.HasValue(arena_table.loser, pl_gang_id) then
-            return
-        end
-
-        if arena_table.winner == pl_gang_id then
-            FatedGang.notify(pl, 'Вы итак на арене, т.к. являетесь владельцем.')
-
-            return
-        end
-
-        if pl:GetGangActiveArena() != '0' and pl:GetGangActiveArena() != arena_id then
-            FatedGang.notify(pl, 'Вы уже учавствуете в захвате другой точки!')
-
-            return
-        end
-
-        if arena_table.status == 1 and pl:GetGangActiveArena() == arena_id then
-            pl:SetGangActiveArena('0')
-
-            if arena_table.gangs[2] == pl:GetGangId() then
-                arena_table.gangs[2] = ''
-            elseif arena_table.gangs[1] == pl:GetGangId() then
-                arena_table.gangs[1] = ''
+                return 
             end
 
-            arena_table.status = 0
+            if !pl:IsGangBoss() then
+                FatedGang.notify(pl, 'Вы не босс.')
+        
+                return
+            end
 
-            net.Start('FatedGang-ToClientArena')
-                net.WriteTable(FatedGang.arenas)
-            net.Broadcast()
+            local arena_id = net.ReadString()
+            local arena_table = FatedGang.arenas[arena_id]
 
-            return
-        end
+            if !arena_table then
+                FatedGang.notify(pl, 'Такой арены не существует!')
+                
+                return
+            end
 
-        pl:SetGangActiveArena(arena_id)
+            local server_time = GetGlobalFloat('SRP_Time') -- Можете вырезать проверку, либо привязать своё игровое время
 
-        local function TwoPlayerJoin(gang_id)
-            arena_table.gangs[2] = gang_id
-            arena_table.status = 2
-            arena_table.time_start = CurTime() + FatedGang.config.arena_waiting_time
+            if !(server_time > 0 and server_time < 6) then
+                FatedGang.notify(pl, 'Не подходящее время! С 0:00 до 6:00')
 
-            timer.Create('FatedGang.Arena-' .. arena_table.gangs[1], 1, FatedGang.config.arena_waiting_time, function()
-                local function PlayerCheckReady(t)
-                    arena_table.players[t] = {}
+                return
+            end
 
-                    for steamid, _ in pairs(FatedGang.data[arena_table.gangs[t]].players) do
-                        local gang_pl = player.GetBySteamID(steamid)
-    
-                        if !gang_pl then
-                            return
-                        end
-    
-                        if gang_pl:GetNWBool('fated_gang_arena_ready', false) then
-                            if table.Count(arena_table.players[t]) < 4 then
-                                table.insert(arena_table.players[t], gang_pl:SteamID64())
-                            end
-                        end
-                    end
+            if arena_table.status == 3 then
+                FatedGang.notify(pl, 'Эта точка уже захватывается.')
+                
+                return
+            end
+
+            local pl_gang_id = pl:GetGangId()
+
+            if table.HasValue(arena_table.loser, pl_gang_id) then
+                return
+            end
+
+            if arena_table.winner == pl_gang_id then
+                FatedGang.notify(pl, 'Вы итак на арене, т.к. являетесь владельцем.')
+
+                return
+            end
+
+            if pl:GetGangActiveArena() != '0' and pl:GetGangActiveArena() != arena_id then
+                FatedGang.notify(pl, 'Вы уже учавствуете в захвате другой точки!')
+
+                return
+            end
+
+            if arena_table.status == 1 and pl:GetGangActiveArena() == arena_id then
+                pl:SetGangActiveArena('0')
+
+                if arena_table.gangs[2] == pl:GetGangId() then
+                    arena_table.gangs[2] = ''
+                elseif arena_table.gangs[1] == pl:GetGangId() then
+                    arena_table.gangs[1] = ''
                 end
 
-                PlayerCheckReady(1)
-                PlayerCheckReady(2)
-
-                if table.Count(arena_table.players[2]) < table.Count(arena_table.players[1]) then
-                    arena_table.winner = ''
-                    arena_table.players[2] = {}
-                    arena_table.gangs[2] = {}
-                    arena_table.status = 1
-                    arena_table.time_start = 0
-
-                    timer.Remove('FatedGang.Arena-' .. arena_table.gangs[1])
-                    timer.Remove('FatedGang.Arena-' .. arena_table.gangs[1] .. '-S')
-                end
+                arena_table.status = 0
 
                 net.Start('FatedGang-ToClientArena')
                     net.WriteTable(FatedGang.arenas)
                 net.Broadcast()
-            end)
 
-            local function StartGamePly(steamid64, arena_type)
-                local pl = player.GetBySteamID64(steamid64)
-
-                if !IsValid(pl) then
-                    return
-                end
-
-                pl:SetGangArenaType(arena_type)
-                pl:SetGangActiveArena(arena_id)
-                pl:SetGangArenaPlayerDeath(false)
-
-                local valid_vectors = {}
-
-                for k, arena_spawn in pairs(arena_table.spawns[arena_type]) do
-                    if !arena_spawn[2] then
-                        table.insert(valid_vectors, k)
-                    end
-                end
-
-                arena_table.spawns[arena_type][table.Random(valid_vectors)][2] = steamid64
-
-                pl:Spawn()
+                return
             end
 
-            local function ArenaRoundStart(round)
-                arena_table.round = arena_table.round + 1
-                arena_table.arena_time = CurTime() + FatedGang.config.arena_round_time
-                arena_table.alive = {0, 0}
-                
-                local function PairGangsTable(t)
-                    for _, steamid64 in pairs(arena_table.players[t]) do
-                        StartGamePly(steamid64, t)
-                    end
-                end
+            pl:SetGangActiveArena(arena_id)
 
-                local function CheckGangAlive(t)
-                    for _, steamid64 in pairs(arena_table.players[t]) do
-                        local pl = player.GetBySteamID64(steamid64)
-    
-                        if IsValid(pl) and !pl:GetGangArenaPlayerDeath() then
-                            if t == 1 then
-                                arena_table.alive[1] = arena_table.alive[1] + 1
-                            else
-                                arena_table.alive[2] = arena_table.alive[2] + 1
+            local function TwoPlayerJoin(gang_id)
+                arena_table.gangs[2] = gang_id
+                arena_table.status = 2
+                arena_table.time_start = CurTime() + FatedGang.config.arena_waiting_time
+
+                timer.Create('FatedGang.Arena-' .. arena_table.gangs[1], 1, FatedGang.config.arena_waiting_time, function()
+                    local function PlayerCheckReady(t)
+                        arena_table.players[t] = {}
+
+                        for steamid, _ in pairs(FatedGang.data[arena_table.gangs[t]].players) do
+                            local gang_pl = player.GetBySteamID(steamid)
+        
+                            if !gang_pl then
+                                return
                             end
-                        end
-                    end
-                end
-
-                CheckGangAlive(1)
-                CheckGangAlive(2)
-
-                local function AddWin(t)
-                    if arena_table.round == 1 then
-                        return
-                    end
-
-                    arena_table.wins[t] = arena_table.wins[t] + 1
-                end
-
-                if arena_table.alive[1] > arena_table.alive[2] then
-                    AddWin(1)
-                elseif arena_table.alive[2] > arena_table.alive[1] then
-                    AddWin(2)
-                end
-
-                if arena_table.round == FatedGang.config.arena_rounds + 1 or arena_table.wins[1] > FatedGang.config.arena_rounds * 0.5 or arena_table.wins[2] > FatedGang.config.arena_rounds * 0.5 then
-                    arena_table.status = 4
-                    arena_table.time_start = 0
-                    arena_table.arena_time = 0
-                    arena_table.round = 0
-
-                    local function RemovePlayersFromArena(t)
-                        for _, steamid64 in pairs(arena_table.players[t]) do
-                            local pl = player.GetBySteamID64(steamid64)
-
-                            if IsValid(pl) then
-                                pl:SetGangArenaType('0')
-                                pl:SetGangActiveArena('0')
-                                pl:SetGangArenaPlayerDeath(false)
-                                pl:Spawn()
+        
+                            if gang_pl:GetNWBool('fated_gang_arena_ready', false) then
+                                if table.Count(arena_table.players[t]) < 4 then
+                                    table.insert(arena_table.players[t], gang_pl:SteamID64())
+                                end
                             end
                         end
                     end
 
-                    RemovePlayersFromArena(1)
-                    RemovePlayersFromArena(2)
+                    PlayerCheckReady(1)
+                    PlayerCheckReady(2)
 
-                    arena_table.players = {
-                        {},
-                        {}
-                    }
+                    if table.Count(arena_table.players[2]) < table.Count(arena_table.players[1]) then
+                        arena_table.winner = ''
+                        arena_table.players[2] = {}
+                        arena_table.gangs[2] = {}
+                        arena_table.status = 1
+                        arena_table.time_start = 0
 
-                    local function SaveGangWin(t)
-                        local gang_id_winner = arena_table.gangs[t]
-                        local gang_winner_table = FatedGang.data[gang_id_winner]
-
-                        gang_winner_table.arena_wins = gang_winner_table.arena_wins + 1
-                        arena_table.winner = gang_id_winner
-
-                        local lose_info = arena_table.gangs[3 - t]
-
-                        print(lose_info)
-
-                        table.insert(arena_table.loser, lose_info)
-                    end
-
-                    if arena_table.wins[1] > arena_table.wins[2] then
-                        SaveGangWin(1)
-                    elseif arena_table.wins[2] > arena_table.wins[1] then
-                        SaveGangWin(2)
-                    end
-
-                    arena_table.wins = {0, 0}
-                    arena_table.gangs = {
-                        '',
-                        ''
-                    }
-                    arena_table.alive = {0, 0}
-
-                    if timer.Exists('FatedGang.Arena-' .. arena_table.id) then
-                        timer.Remove('FatedGang.Arena-' .. arena_table.id)
+                        timer.Remove('FatedGang.Arena-' .. arena_table.gangs[1])
+                        timer.Remove('FatedGang.Arena-' .. arena_table.gangs[1] .. '-S')
                     end
 
                     net.Start('FatedGang-ToClientArena')
                         net.WriteTable(FatedGang.arenas)
                     net.Broadcast()
-
-                    FatedGang.initializationSendGangData()
-                    net.Broadcast()
-
-                    if timer.Exists('FatedGang.Arena.Game-' .. arena_id) then
-                        timer.Remove('FatedGang.Arena.Game-' .. arena_id)
-                    end
-
-                    return
-                end
-
-                PairGangsTable(1)
-                PairGangsTable(2)
-
-                local function ResetSpawnTeam(t)
-                    for k, spawn in pairs(arena_table.spawns[t]) do
-                        spawn[2] = nil
-                    end
-                end
-
-                ResetSpawnTeam(1)
-                ResetSpawnTeam(2)
-
-                net.Start('FatedGang-ToClientArena')
-                    net.WriteTable(FatedGang.arenas)
-                net.Broadcast()
-            end
-
-            timer.Create('FatedGang.Arena-' .. arena_table.gangs[1] .. '-S', FatedGang.config.arena_waiting_time, 1, function()
-                arena_table.status = 3
-                arena_table.weapon = table.Random(FatedGang.config.arena_weapons)
-
-                ArenaRoundStart(arena_table.round)
-
-                timer.Create('FatedGang.Arena.Game-' .. arena_id, FatedGang.config.arena_round_time + 1, FatedGang.config.arena_rounds, function()
-                    ArenaRoundStart(arena_table.round)
                 end)
-            end)
-        end
 
-        if arena_table.gangs[1] == '' then
-            arena_table.gangs[1] = pl:GetGangId()
-            
-            if arena_table.winner != '' then
-                TwoPlayerJoin(arena_table.winner)
-            else
-                arena_table.status = 1
+                local function StartGamePly(steamid64, arena_type)
+                    local pl = player.GetBySteamID64(steamid64)
+
+                    if !IsValid(pl) then
+                        return
+                    end
+
+                    pl:SetGangArenaType(arena_type)
+                    pl:SetGangActiveArena(arena_id)
+                    pl:SetGangArenaPlayerDeath(false)
+
+                    local valid_vectors = {}
+
+                    for k, arena_spawn in pairs(arena_table.spawns[arena_type]) do
+                        if !arena_spawn[2] then
+                            table.insert(valid_vectors, k)
+                        end
+                    end
+
+                    arena_table.spawns[arena_type][table.Random(valid_vectors)][2] = steamid64
+
+                    pl:Spawn()
+                end
+
+                local function ArenaRoundStart(round)
+                    arena_table.round = arena_table.round + 1
+                    arena_table.arena_time = CurTime() + FatedGang.config.arena_round_time
+                    arena_table.alive = {0, 0}
+                    
+                    local function PairGangsTable(t)
+                        for _, steamid64 in pairs(arena_table.players[t]) do
+                            StartGamePly(steamid64, t)
+                        end
+                    end
+
+                    local function CheckGangAlive(t)
+                        for _, steamid64 in pairs(arena_table.players[t]) do
+                            local pl = player.GetBySteamID64(steamid64)
+        
+                            if IsValid(pl) and !pl:GetGangArenaPlayerDeath() then
+                                if t == 1 then
+                                    arena_table.alive[1] = arena_table.alive[1] + 1
+                                else
+                                    arena_table.alive[2] = arena_table.alive[2] + 1
+                                end
+                            end
+                        end
+                    end
+
+                    CheckGangAlive(1)
+                    CheckGangAlive(2)
+
+                    local function AddWin(t)
+                        if arena_table.round == 1 then
+                            return
+                        end
+
+                        arena_table.wins[t] = arena_table.wins[t] + 1
+                    end
+
+                    if arena_table.alive[1] > arena_table.alive[2] then
+                        AddWin(1)
+                    elseif arena_table.alive[2] > arena_table.alive[1] then
+                        AddWin(2)
+                    end
+
+                    if arena_table.round == FatedGang.config.arena_rounds + 1 or arena_table.wins[1] > FatedGang.config.arena_rounds * 0.5 or arena_table.wins[2] > FatedGang.config.arena_rounds * 0.5 then
+                        arena_table.status = 4
+                        arena_table.time_start = 0
+                        arena_table.arena_time = 0
+                        arena_table.round = 0
+
+                        local function RemovePlayersFromArena(t)
+                            for _, steamid64 in pairs(arena_table.players[t]) do
+                                local pl = player.GetBySteamID64(steamid64)
+
+                                if IsValid(pl) then
+                                    pl:SetGangArenaType('0')
+                                    pl:SetGangActiveArena('0')
+                                    pl:SetGangArenaPlayerDeath(false)
+                                    pl:Spawn()
+                                end
+                            end
+                        end
+
+                        RemovePlayersFromArena(1)
+                        RemovePlayersFromArena(2)
+
+                        arena_table.players = {
+                            {},
+                            {}
+                        }
+
+                        local function SaveGangWin(t)
+                            local gang_id_winner = arena_table.gangs[t]
+                            local gang_winner_table = FatedGang.data[gang_id_winner]
+
+                            gang_winner_table.arena_wins = gang_winner_table.arena_wins + 1
+                            arena_table.winner = gang_id_winner
+
+                            local lose_info = arena_table.gangs[3 - t]
+
+                            print(lose_info)
+
+                            table.insert(arena_table.loser, lose_info)
+                        end
+
+                        if arena_table.wins[1] > arena_table.wins[2] then
+                            SaveGangWin(1)
+                        elseif arena_table.wins[2] > arena_table.wins[1] then
+                            SaveGangWin(2)
+                        end
+
+                        arena_table.wins = {0, 0}
+                        arena_table.gangs = {
+                            '',
+                            ''
+                        }
+                        arena_table.alive = {0, 0}
+
+                        if timer.Exists('FatedGang.Arena-' .. arena_table.id) then
+                            timer.Remove('FatedGang.Arena-' .. arena_table.id)
+                        end
+
+                        net.Start('FatedGang-ToClientArena')
+                            net.WriteTable(FatedGang.arenas)
+                        net.Broadcast()
+
+                        FatedGang.initializationSendGangData()
+                        net.Broadcast()
+
+                        if timer.Exists('FatedGang.Arena.Game-' .. arena_id) then
+                            timer.Remove('FatedGang.Arena.Game-' .. arena_id)
+                        end
+
+                        return
+                    end
+
+                    PairGangsTable(1)
+                    PairGangsTable(2)
+
+                    local function ResetSpawnTeam(t)
+                        for k, spawn in pairs(arena_table.spawns[t]) do
+                            spawn[2] = nil
+                        end
+                    end
+
+                    ResetSpawnTeam(1)
+                    ResetSpawnTeam(2)
+
+                    net.Start('FatedGang-ToClientArena')
+                        net.WriteTable(FatedGang.arenas)
+                    net.Broadcast()
+                end
+
+                timer.Create('FatedGang.Arena-' .. arena_table.gangs[1] .. '-S', FatedGang.config.arena_waiting_time, 1, function()
+                    arena_table.status = 3
+                    arena_table.weapon = table.Random(FatedGang.config.arena_weapons)
+
+                    ArenaRoundStart(arena_table.round)
+
+                    timer.Create('FatedGang.Arena.Game-' .. arena_id, FatedGang.config.arena_round_time + 1, FatedGang.config.arena_rounds, function()
+                        ArenaRoundStart(arena_table.round)
+                    end)
+                end)
             end
-        elseif arena_table.gangs[2] == '' and pl:GetGangId() != arena_table.gangs[1] then
-            TwoPlayerJoin(pl:GetGangId())
-        end
 
-        net.Start('FatedGang-ToClientArena')
-            net.WriteTable(FatedGang.arenas)
-        net.Broadcast()
-    end)
+            if arena_table.gangs[1] == '' then
+                arena_table.gangs[1] = pl:GetGangId()
+                
+                if arena_table.winner != '' then
+                    TwoPlayerJoin(arena_table.winner)
+                else
+                    arena_table.status = 1
+                end
+            elseif arena_table.gangs[2] == '' and pl:GetGangId() != arena_table.gangs[1] then
+                TwoPlayerJoin(pl:GetGangId())
+            end
+
+            net.Start('FatedGang-ToClientArena')
+                net.WriteTable(FatedGang.arenas)
+            net.Broadcast()
+        end)
+    end
 end
 
 if CLIENT then
@@ -536,11 +541,13 @@ if CLIENT then
         FatedGang.data = data
     end)
 
-    net.Receive('FatedGang-ToClientArena', function()
-        local data = net.ReadTable()
+    if FatedGang.config.arena_enabled then
+        net.Receive('FatedGang-ToClientArena', function()
+            local data = net.ReadTable()
 
-        FatedGang.arenas = data
-    end)
+            FatedGang.arenas = data
+        end)
+    end
 
     local color_green_1 = Color(58, 116, 91)
     local color_green_2 = Color(68, 85, 78)

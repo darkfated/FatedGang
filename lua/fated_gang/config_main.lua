@@ -1,3 +1,13 @@
+// Цена создания банды
+FatedGang.config.cost_create = 5000000
+
+// Включены ли арены или нет (арены - место сражений банд)
+FatedGang.config.arena_enabled = false
+
+if !FatedGang.config.arena_enabled then
+    return
+end
+
 // Список арен на примере gm_construct
 function FatedGang.CreateArenaList()
     FatedGang.arena_create('Водный пейзаж', 'Неплохая арена с видом на водоём.', 'water', {
@@ -15,7 +25,7 @@ end
 FatedGang.CreateArenaList()
 
 // Сколько времени происходит набор участников до захвата
-FatedGang.config.arena_waiting_time = 4
+FatedGang.config.arena_waiting_time = 10
 
 // Доступное оружие на арене
 FatedGang.config.arena_weapons = {
@@ -34,7 +44,7 @@ FatedGang.config.arena_models = {
 FatedGang.config.arena_rounds = 3
 
 // Длительность раундов
-FatedGang.config.arena_round_time = 8
+FatedGang.config.arena_round_time = 60
 
 // Точки возраждения для тех, кто умер в раунде (находится в месте ожидания)
 FatedGang.config.arena_spawns_waiting = {
@@ -43,6 +53,3 @@ FatedGang.config.arena_spawns_waiting = {
     Vector(-2765, -3024, 3040),
     Vector(-2771, -2545, 3040)
 }
-
-// Цена создания банды
-FatedGang.config.cost_create = 5000000
