@@ -259,7 +259,7 @@ if SERVER then
                 return
             end
 
-            local server_time = GetGlobalFloat('SRP_Time') -- Можете вырезать проверку, либо привязать своё игровое время
+            local server_time = DaynightGlobal:GetTime() -- Можете вырезать проверку, либо привязать своё игровое время
 
             if !(server_time > 0 and server_time < 6) then
                 FatedGang.notify(pl, 'Не подходящее время! С 0:00 до 6:00')
