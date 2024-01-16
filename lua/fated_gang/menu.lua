@@ -77,7 +77,7 @@ local function CreateGang()
                         draw.SimpleText(invite.name, 'Fated.22', 56, h * 0.5, color_black, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
                     end
                 end
-            end, 0, 512, 512)
+            end)
 
             panel_invite.panel_right = vgui.Create('DPanel', panel_invite)
             panel_invite.panel_right:Dock(RIGHT)
@@ -181,7 +181,7 @@ local function CreateGang()
                         surface.DrawTexturedRect(w * 0.5 - 32, 0, 64, h)
                     end
                 end
-            end, 0, 512, 512)
+            end)
         end)
     end
 
@@ -330,7 +330,7 @@ local function OpenGang()
                     colorShadowAlpha = 0
                 end
             end
-        end, 0, 512, 512)
+        end)
     end
 
     CreateGangImg(gang_table.img)
@@ -843,7 +843,7 @@ local function OpenGang()
                     if self:IsVisible() and !self.mat then
                         http.DownloadMaterial('https://i.imgur.com/' .. gang_table.img .. '.png', gang_table.img .. '.png', function(gang_icon)
                             self.mat = gang_icon
-                        end, 0, 512, 512)
+                        end)
                     end
 
                     draw.RoundedBox(6, 0, 0, w, h, Mantle.color.panel_alpha[2])
@@ -1031,7 +1031,7 @@ local function OpenGang()
                             surface.SetDrawColor(color_white)
                             surface.SetMaterial(gang_icon)
                             surface.DrawTexturedRect(x + 6, y + 6, 64, 64)
-                        end, 0, 512, 512)
+                        end)
 
                         draw.SimpleText(id == 1 and 'Первая банда' or 'Вторая банда', 'Fated.20', x + 76, y + 27, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
                         draw.SimpleText(gang_current_table.name, 'Fated.17', x + 76, y + 47, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
@@ -1264,7 +1264,7 @@ local function OpenGang()
                     if self:IsVisible() and !self.mat then
                         http.DownloadMaterial('https://i.imgur.com/' .. place_gang.img .. '.png', place_gang.img .. '.png', function(gang_icon)
                             self.mat = gang_icon
-                        end, 0, 512, 512)
+                        end)
                     end
 
                     draw.RoundedBox(6, 0, 0, w, h, Mantle.color.panel_alpha[1])
