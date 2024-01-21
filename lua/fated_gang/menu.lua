@@ -779,6 +779,7 @@ local function OpenGang()
             end
 
             FatedGang.ui.OpenGang.tab_information.right_content.panel_players.sp = vgui.Create('DScrollPanel', FatedGang.ui.OpenGang.tab_information.right_content.panel_players)
+            Mantle.ui.sp(FatedGang.ui.OpenGang.tab_information.right_content.panel_players.sp)
             FatedGang.ui.OpenGang.tab_information.right_content.panel_players.sp:Dock(FILL)
             FatedGang.ui.OpenGang.tab_information.right_content.panel_players.sp:DockMargin(6, 6, 6, 6)
 
