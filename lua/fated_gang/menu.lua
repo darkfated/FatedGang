@@ -1261,20 +1261,21 @@ local function OpenGang()
                 panel_gang:DockMargin(0, 0, 0, 6)
                 panel_gang:SetTall(50)
                 panel_gang.place = place
-                panel_gang.Paint = function(self, w, h)
-                    if self:IsVisible() and !self.mat then
-                        http.DownloadMaterial('https://i.imgur.com/' .. place_gang.img .. '.png', place_gang.img .. '.png', function(gang_icon)
-                            self.mat = gang_icon
-                        end)
-                    end
 
+                http.DownloadMaterial('https://i.imgur.com/' .. place_gang.img .. '.png', place_gang.img .. '.png', function(gang_icon)
+                    panel_gang.mat = gang_icon
+                end)
+
+                panel_gang.Paint = function(self, w, h)
                     draw.RoundedBox(6, 0, 0, w, h, Mantle.color.panel_alpha[1])
                     draw.SimpleText(place_gang.name, 'Fated.17', 56, h * 0.5 - 1, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
                     draw.SimpleText(place_gang[seacrh_type], 'Fated.17', w * 0.5, h * 0.5 - 1, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 
-                    surface.SetDrawColor(color_white)
-                    surface.SetMaterial(self.mat)
-                    surface.DrawTexturedRect(0, 0, 50, 50)
+                    if self:IsVisible() and self.mat then
+                        surface.SetDrawColor(color_white)
+                        surface.SetMaterial(self.mat)
+                        surface.DrawTexturedRect(0, 0, 50, 50)
+                    end
 
                     draw.RoundedBoxEx(4, w - 60, 0, 60, h, place_gang.color, false, true, false, true)
                     draw.SimpleText(self.place, 'Fated.20', w - 29, h * 0.5 - 1, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
