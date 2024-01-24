@@ -5,30 +5,27 @@
 ]]--
 
 local function run_scripts()
-    local cl = SERVER and AddCSLuaFile or include
-    local sv = SERVER and include or function() end
+    Mantle.run_sv('func.lua')
+    Mantle.run_cl('func.lua')
 
-    sv('func.lua')
-    cl('func.lua')
+    Mantle.run_cl('config_main.lua')
+    Mantle.run_sv('config_main.lua')
+    Mantle.run_cl('config_shop.lua')
+    Mantle.run_sv('config_shop.lua')
 
-    cl('config_main.lua')
-    sv('config_main.lua')
-    cl('config_shop.lua')
-    sv('config_shop.lua')
-
-    sv('meta.lua')
-    cl('meta.lua')
+    Mantle.run_sv('meta.lua')
+    Mantle.run_cl('meta.lua')
     
-    sv('data.lua')
-    sv('commands.lua')
+    Mantle.run_sv('data.lua')
+    Mantle.run_sv('commands.lua')
 
-    sv('nets.lua')
-    cl('nets.lua')
+    Mantle.run_sv('nets.lua')
+    Mantle.run_cl('nets.lua')
 
-    sv('hooks.lua')
-    cl('hooks.lua')
+    Mantle.run_sv('hooks.lua')
+    Mantle.run_cl('hooks.lua')
     
-    cl('menu.lua')
+    Mantle.run_cl('menu.lua')
 end
 
 local function init()
