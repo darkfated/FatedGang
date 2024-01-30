@@ -850,16 +850,18 @@ local function OpenGang()
                     draw.RoundedBox(6, 0, 0, w, h, Mantle.color.panel_alpha[2])
                     draw.RoundedBox(4, 6, 6, 50, 50, gang_table.color, true, false, true, false)
 
-                    surface.SetDrawColor(color_white)
-                    surface.SetMaterial(self.mat)
-                    
-                    if FatedGang.ui.OpenGang.tab_information.left_content.gang_id == gang_id then
-                        self.img_size = Lerp(0.1, self.img_size, 46)
-                    else
-                        self.img_size = Lerp(0.1, self.img_size, 38)
+                    if self.mat then
+                        surface.SetDrawColor(color_white)
+                        surface.SetMaterial(self.mat)
+                        
+                        if FatedGang.ui.OpenGang.tab_information.left_content.gang_id == gang_id then
+                            self.img_size = Lerp(0.1, self.img_size, 46)
+                        else
+                            self.img_size = Lerp(0.1, self.img_size, 38)
+                        end
+                        
+                        surface.DrawTexturedRect(32 - self.img_size * 0.5, 32 - self.img_size * 0.5, self.img_size - 1, self.img_size - 1)
                     end
-                    
-                    surface.DrawTexturedRect(32 - self.img_size * 0.5, 32 - self.img_size * 0.5, self.img_size - 1, self.img_size - 1)
 
                     draw.SimpleText(gang_table.name, 'Fated.17', 64, 12, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
                     draw.SimpleText('Кол-во: ' .. table.Count(gang_table.players), 'Fated.17', 64, 50, Mantle.color.theme, TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM)
