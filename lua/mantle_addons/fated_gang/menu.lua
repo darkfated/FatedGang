@@ -284,18 +284,6 @@ local function OpenGang()
     FatedGang.ui.OpenGang.panel_left.top.color:SetTooltip('Цвет банды')
     FatedGang.ui.OpenGang.panel_left.top.color.DoClick = function()
         Mantle.ui.color_picker(function(col)
-            if col.r > 170 then
-                col.r = 170
-            end
-    
-            if col.g > 170 then
-                col.g = 170
-            end
-    
-            if col.b > 170 then
-                col.b = 170
-            end
-
             net.Start('FatedGang-SetColor')
                 net.WriteColor(col, false)
             net.SendToServer()
