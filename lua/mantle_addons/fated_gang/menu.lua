@@ -167,8 +167,10 @@ local function CreateGang()
         Mantle.ui.text_box('Установить иконку', 'Вставьте ссылку на imgur-картинку', function(img_url)
             local img_code = img_url
 
-            if string.len(img_code) != 7 then
-                img_code = string.sub(img_url, 21, 27)
+            if string.len(img_code) == 31 then
+                img_code = string.sub(img_code, 21, 27)
+            else
+                return
             end
 
             FatedGang.ui.CreateGang.icon = img_code
@@ -329,8 +331,10 @@ local function OpenGang()
         Mantle.ui.text_box('Установить иконку', 'Вставьте ссылку на imgur_картинку', function(img_url)
             local img_code = img_url
 
-            if string.len(img_code) != 7 then
-                img_code = string.sub(img_url, 21, 27)
+            if string.len(img_code) == 31 then
+                img_code = string.sub(img_code, 21, 27)
+            else
+                return
             end
 
             RunConsoleCommand('fated_gang_command_img', img_code)
