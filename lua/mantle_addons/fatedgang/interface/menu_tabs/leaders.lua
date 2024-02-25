@@ -1,0 +1,3 @@
+-- FatedGang.add_tab(5, 'Топ лидеров', 'npc_shop/weapon.png', function(self)
+--     -- Clear
+-- end)

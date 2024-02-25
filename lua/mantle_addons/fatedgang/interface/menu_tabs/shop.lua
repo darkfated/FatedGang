@@ -1,0 +1,3 @@
+-- FatedGang.add_tab(3, 'Магазин', 'npc_shop/weapon.png', function(self)
+--     -- Clear
+-- end)
