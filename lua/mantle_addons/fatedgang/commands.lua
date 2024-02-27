@@ -65,7 +65,7 @@ concommand.Add('fatedgang_command_add_rank', function(pl, _, args)
         return
     end
 
-    if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+    if !pl:IsSuperAdmin() and pl:SteamID() != id then
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
 
         return
@@ -115,7 +115,7 @@ concommand.Add('fatedgang_command_rename_rank', function(pl, _, args)
         return
     end
 
-    if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+    if !pl:IsSuperAdmin() and pl:SteamID() != id then
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
 
         return
@@ -156,7 +156,7 @@ concommand.Add('fatedgang_command_remove_rank', function(pl, _, args)
         return
     end
 
-    if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+    if !pl:IsSuperAdmin() and pl:SteamID() != id then
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
 
         return
@@ -202,7 +202,7 @@ concommand.Add('fatedgang_command_set_rank', function(pl, _, args)
         return
     end
 
-    if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+    if !pl:IsSuperAdmin() and pl:SteamID() != id then
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
         
         return
@@ -221,14 +221,6 @@ concommand.Add('fatedgang_command_set_rank', function(pl, _, args)
         sql.Query(queryUpdate)
 
         gang_table.players = players_table
-
-        for gang_pl, _ in pairs(players_table) do
-            local gang_game_pl = player.GetBySteamID(gang_pl)
-
-            if gang_game_pl then
-                Mantle.notify(gang_game_pl, Color(102, 49, 138), 'Банды', pl:Name() .. ' присоединился!')
-            end
-        end
 
         net.Start('FatedGang-ToClient')
             net.WriteString(pl_gang)
@@ -251,7 +243,7 @@ concommand.Add('fatedgang_command_kick', function(pl, _, args)
         return
     end
 
-    if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+    if !pl:IsSuperAdmin() and pl:SteamID() != id then
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
 
         return
@@ -306,7 +298,7 @@ concommand.Add('fatedgang_command_img', function(pl, _, args)
         return
     end
 
-    if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+    if !pl:IsSuperAdmin() and pl:SteamID() != id then
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
 
         return

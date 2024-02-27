@@ -87,7 +87,7 @@ if SERVER then
             return
         end
 
-        if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+        if !pl:IsSuperAdmin() and pl:SteamID() != id then
             Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
     
             return
@@ -137,7 +137,7 @@ if SERVER then
             return
         end
 
-        if !pl:IsSuperAdmin() and pl:SteamID() != pl_gang then
+        if !pl:IsSuperAdmin() and pl:SteamID() != id then
             Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'У вас нету прав на совершение этого действия.')
     
             return
@@ -184,8 +184,8 @@ if SERVER then
                     rank = 1
                 }
                 players_table = util.TableToJSON(players_table)
-    
-                local queryUpdate = string.format("UPDATE fatedgang SET players = '%s' WHERE id = '%s'", players_table, id)
+
+                local queryUpdate = string.format("UPDATE fatedgang SET players = '%s' WHERE id = '%s'", players_table, gang_id)
                 sql.Query(queryUpdate)
     
                 gang_table.players = players_table
