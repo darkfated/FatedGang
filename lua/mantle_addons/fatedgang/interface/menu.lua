@@ -27,6 +27,7 @@ function FatedGang.open_menu(standart_id)
             FatedGang.menu.top_panel = vgui.Create('DPanel', FatedGang.menu)
             FatedGang.menu.top_panel:Dock(TOP)
             FatedGang.menu.top_panel:DockMargin(0, 0, 0, 6)
+            FatedGang.menu.top_panel:DockPadding(16, 8, 16, 8)
             FatedGang.menu.top_panel:SetTall(110)
         end
 
@@ -81,11 +82,14 @@ function FatedGang.open_menu(standart_id)
             FatedGang.menu.top_panel.btn_remove:Remove()
         end
 
+        if IsValid(FatedGang.menu.top_panel.left_gang) then
+            FatedGang.menu.top_panel.left_gang:Remove()
+        end
+
         if players_table[lp:SteamID()] then
             FatedGang.menu.top_panel.btn_leave = vgui.Create('DButton', FatedGang.menu.top_panel)
             Mantle.ui.btn(FatedGang.menu.top_panel.btn_leave)
             FatedGang.menu.top_panel.btn_leave:Dock(LEFT)
-            FatedGang.menu.top_panel.btn_leave:DockMargin(16, 8, 8, 8)
             FatedGang.menu.top_panel.btn_leave:SetWide(96)
             FatedGang.menu.top_panel.btn_leave:SetText('Покинуть')
             FatedGang.menu.top_panel.btn_leave.DoClick = function()
@@ -99,7 +103,6 @@ function FatedGang.open_menu(standart_id)
             FatedGang.menu.top_panel.btn_remove = vgui.Create('DButton', FatedGang.menu.top_panel)
             Mantle.ui.btn(FatedGang.menu.top_panel.btn_remove)
             FatedGang.menu.top_panel.btn_remove:Dock(LEFT)
-            FatedGang.menu.top_panel.btn_remove:DockMargin(16, 8, 8, 8)
             FatedGang.menu.top_panel.btn_remove:SetWide(96)
             FatedGang.menu.top_panel.btn_remove:SetText('Удалить')
             FatedGang.menu.top_panel.btn_remove.DoClick = function()
@@ -111,11 +114,26 @@ function FatedGang.open_menu(standart_id)
             end
         end
 
+        if id != lp:GangId() then
+            FatedGang.menu.top_panel.left_gang = vgui.Create('DButton', FatedGang.menu.top_panel)
+            Mantle.ui.btn(FatedGang.menu.top_panel.left_gang)
+            FatedGang.menu.top_panel.left_gang:Dock(LEFT)
+            FatedGang.menu.top_panel.left_gang:SetWide(96)
+            FatedGang.menu.top_panel.left_gang:SetText('Вернуться')
+            FatedGang.menu.top_panel.left_gang.DoClick = function()
+                FatedGang.menu.create_top_panel(lp:GangId())
+
+                FatedGang.menu.tabs_sp.active_tab = 1
+                
+                FatedGang.menu.main_panel:Clear()
+                FatedGang.menu_tabs[1].func(FatedGang.menu.main_panel)
+            end
+        end
+
         if players_table[lp:SteamID()] and players_table[lp:SteamID()].boss or lp:IsSuperAdmin() then
             FatedGang.menu.top_panel.btn_invite = vgui.Create('DButton', FatedGang.menu.top_panel)
             Mantle.ui.btn(FatedGang.menu.top_panel.btn_invite)
             FatedGang.menu.top_panel.btn_invite:Dock(RIGHT)
-            FatedGang.menu.top_panel.btn_invite:DockMargin(8, 8, 16, 8)
             FatedGang.menu.top_panel.btn_invite:SetWide(96)
             FatedGang.menu.top_panel.btn_invite:SetText('Пригласить')
             FatedGang.menu.top_panel.btn_invite.DoClick = function()
