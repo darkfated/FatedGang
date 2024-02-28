@@ -103,6 +103,7 @@ function FatedGang.open_menu(standart_id)
             FatedGang.menu.top_panel.btn_remove = vgui.Create('DButton', FatedGang.menu.top_panel)
             Mantle.ui.btn(FatedGang.menu.top_panel.btn_remove)
             FatedGang.menu.top_panel.btn_remove:Dock(LEFT)
+            FatedGang.menu.top_panel.btn_remove:DockMargin(0, 0, 8, 0)
             FatedGang.menu.top_panel.btn_remove:SetWide(96)
             FatedGang.menu.top_panel.btn_remove:SetText('Удалить')
             FatedGang.menu.top_panel.btn_remove.DoClick = function()
@@ -124,7 +125,7 @@ function FatedGang.open_menu(standart_id)
                 FatedGang.menu.create_top_panel(lp:GangId())
 
                 FatedGang.menu.tabs_sp.active_tab = 1
-                
+
                 FatedGang.menu.main_panel:Clear()
                 FatedGang.menu_tabs[1].func(FatedGang.menu.main_panel)
             end
