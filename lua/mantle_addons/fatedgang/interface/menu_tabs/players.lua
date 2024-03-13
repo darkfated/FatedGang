@@ -49,7 +49,7 @@ FatedGang.add_tab(1, 'Игроки банды', 'fatedgang/tab_players.png', fun
         local rank_wide = surface.GetTextSize(rank_text)
  
         pl_btn.Paint = function(_, w, h)
-            draw.RoundedBox(6, 0, 0, w, h, Mantle.color.panel_alpha[1])
+            draw.RoundedBox(6, 0, 0, w, h, Mantle.color.panel_alpha[2])
 
             draw.SimpleText(pl_data.nick, 'Fated.18', 45, h * 0.5 - 1, Mantle.color.gray, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
             draw.SimpleText(pl_data.nick, 'Fated.18', 44, h * 0.5 - 1, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
@@ -57,7 +57,10 @@ FatedGang.add_tab(1, 'Игроки банды', 'fatedgang/tab_players.png', fun
             draw.RoundedBox(8, w * 0.5 - rank_wide * 0.5 - 8, 6, rank_wide + 16, h - 12, pl_rank_table.col)
             draw.SimpleText(rank_text, 'Fated.18', w * 0.5, h * 0.5 - 1, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         end
-        pl_btn.DoRightClick = function()
+
+        local function pl_click()
+            Mantle.func.sound()
+            
             local DM = Mantle.ui.derma_menu()
             DM:AddOption('Скопировать SteamID', function()
                 SetClipboardText(pl_steamid)
@@ -65,15 +68,18 @@ FatedGang.add_tab(1, 'Игроки банды', 'fatedgang/tab_players.png', fun
             DM:AddOption('Открыть Steam', function()
                 gui.OpenURL('https://steamcommunity.com/profiles/' .. pl_data.steamid64)
             end, 'icon16/layout_content.png')
-            DM:AddOption('Игровой профиль', function()
-                RunConsoleCommand('gameprofile_get_player', pl_steamid)
-                
-                timer.Simple(0.2, function()
-                    FatedGang.menu:Remove()
 
-                    GameProfile.open_profile(true)
-                end)
-            end, 'icon16/contrast.png')
+            if GameProfile then
+                DM:AddOption('Игровой профиль', function()
+                    RunConsoleCommand('gameprofile_get_player', pl_steamid)
+                    
+                    timer.Simple(0.2, function()
+                        FatedGang.menu:Remove()
+
+                        GameProfile.open_profile(true)
+                    end)
+                end, 'icon16/contrast.png')
+            end
 
             if lp:IsSuperAdmin() or pl_gang == id then
                 DM:AddSpacer()
@@ -92,6 +98,13 @@ FatedGang.add_tab(1, 'Игроки банды', 'fatedgang/tab_players.png', fun
                     RunConsoleCommand('fatedgang_command_kick', gang_table.id, pl_steamid)
                 end, 'icon16/cancel.png')
             end
+        end
+
+        pl_btn.DoClick = function()
+            pl_click()
+        end
+        pl_btn.DoRightClick = function()
+            pl_click()
         end
 
         pl_btn.avatar = vgui.Create('AvatarImage', pl_btn)
