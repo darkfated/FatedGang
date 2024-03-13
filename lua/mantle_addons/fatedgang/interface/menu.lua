@@ -50,10 +50,15 @@ function FatedGang.open_menu(standart_id)
             draw.SimpleText(txt, font, x, y, col, align_x, align_y)
         end
 
+        local gradientColor = ColorAlpha(info_table.col, 50)
+
         FatedGang.menu.top_panel.Paint = function(self, w, h)
             draw.RoundedBox(8, 0, 0, w, h, color_black)
             draw.RoundedBox(8, 8, 0, w - 16, h, Mantle.color.panel_alpha[2])
-            Mantle.func.gradient(8, h * 0.7, w - 16, h * 0.3, 1, color_shadow)
+
+            local gradientHeight = h * 0.35 + h * 0.15 * math.sin(CurTime() * 0.5)
+
+            Mantle.func.gradient(8, h - gradientHeight, w - 16, gradientHeight, 1, gradientColor)
 
             draw.RoundedBox(0, w * 0.5 - h * 0.5 + 7, 7, h - 14, h - 14, info_table.col)
 
