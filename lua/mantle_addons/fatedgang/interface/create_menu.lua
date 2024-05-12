@@ -50,7 +50,14 @@ local function Create()
     btn_create:Dock(TOP)
     btn_create:DockMargin(14, 8, 14, 0)
     btn_create:SetTall(36)
-    btn_create:SetText('Создать за ' .. DarkRP.formatMoney(FatedGang.config.create_cost))
+
+    local create_text = 'Создать'
+
+    if DarkRP then
+        create_text = create_text .. ' за ' .. DarkRP.formatMoney(FatedGang.config.create_cost)
+    end
+
+    btn_create:SetText(create_text)
     btn_create.DoClick = function()
         net.Start('FatedGang-Create')
             net.WriteString(name_entry:GetValue())

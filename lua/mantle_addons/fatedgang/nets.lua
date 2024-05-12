@@ -29,10 +29,12 @@ if SERVER then
             return
         end
 
-        if !pl:canAfford(FatedGang.config.create_cost) then
-            Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'Не хватает денег (требуется ' .. DarkRP.formatMoney(FatedGang.config.create_cost) .. ')')
+        if DarkRP then
+            if !pl:canAfford(FatedGang.config.create_cost) then
+                Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'Не хватает денег (требуется ' .. DarkRP.formatMoney(FatedGang.config.create_cost) .. ')')
 
-            return
+                return
+            end
         end
 
         local tabl_info = {
@@ -66,7 +68,10 @@ if SERVER then
         sql.Query("INSERT INTO fatedgang (id, info, players) VALUES ('" .. pl:SteamID() .. "', '" .. tabl_info .. "', '" .. tabl_players .. "')")
 
         pl:SetNWString('fatedgang_id', pl:SteamID())
-        pl:addMoney(-FatedGang.config.create_cost)
+
+        if DarkRP then
+            pl:addMoney(-FatedGang.config.create_cost)
+        end
 
         Mantle.notify(pl, Color(102, 49, 138), 'Банды', 'Ваша банда успешно создана!')
         GameProfile.add_achievement(pl, 'create_gang', 1)
